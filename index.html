@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>無料相談のご予約</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #c48260;       /* テラコッタブラウン：ボタン・線 */
+      --accent-ink: #9a5d40;   /* 白地の小さい文字用（読みやすさのため少し濃く） */
+      --bg: #ffffff;
+      --bg-soft: #f9f9f9;
+      --text: #1a1a1a;
+      --sub: #666666;
+      --line: #e5e7eb;
+      --dark: #1a1a1a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: "Noto Sans JP", sans-serif; font-weight: 400;
+      line-height: 1.9; letter-spacing: .05em;
+    }
+
+    /* ===== ヘッダー ===== */
+    .site-head { border-bottom: 1px solid var(--line); }
+    .site-head .inner { max-width: 560px; margin: 0 auto; padding: 20px 16px; display: flex; align-items: baseline; gap: 12px; }
+    .logo { font-weight: 700; font-size: 18px; letter-spacing: .2em; }
+    .logo-sub { font-size: 12px; color: var(--sub); letter-spacing: .08em; }
+
+    main { max-width: 560px; margin: 0 auto; padding: 48px 16px 64px; }
+
+    /* 引き締めるパーツ（黒地に白文字） */
+    .title-box { background: var(--dark); color: #fff; border-radius: 12px; padding: 32px 24px; }
+    .title-box .en { margin: 0 0 8px; font-size: 12px; letter-spacing: .2em; color: #d9b8a6; }
+    .title-box h1 { margin: 0; font-size: 24px; font-weight: 500; letter-spacing: .1em; line-height: 1.6; }
+    .title-box p { margin: 12px 0 0; font-size: 14px; color: #cccccc; }
+
+    /* ===== 手順 ===== */
+    section { margin-top: 48px; }
+    .step-head { display: flex; align-items: center; gap: 12px; margin: 0 0 20px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .step-no { font-size: 13px; font-weight: 700; color: var(--accent-ink); letter-spacing: .15em; }
+    .step-head h2 { margin: 0; font-size: 17px; font-weight: 500; }
+
+    .day { font-size: 14px; font-weight: 500; color: var(--sub); margin: 24px 0 8px; }
+    .day:first-child { margin-top: 0; }
+    .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+    .slot {
+      font: inherit; font-size: 16px; padding: 12px 8px; border-radius: 12px; cursor: pointer;
+      background: var(--bg); color: var(--text); border: 1px solid var(--line); transition: border-color .15s;
+    }
+    .slot:hover { border-color: var(--accent); }
+    .slot[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+    .empty { padding: 24px; background: var(--bg-soft); border-radius: 12px; color: var(--sub); text-align: center; font-size: 14px; }
+
+    .chosen { margin: 0 0 24px; padding: 16px 20px; background: var(--bg-soft); border-left: 2px solid var(--accent); border-radius: 0 12px 12px 0; font-size: 15px; }
+    .chosen span { display: block; font-size: 12px; color: var(--sub); }
+    label { display: block; font-size: 14px; font-weight: 500; margin: 0 0 8px; }
+    label small { color: var(--sub); font-weight: 400; }
+    .field + .field { margin-top: 24px; }
+    textarea { resize: vertical; line-height: 1.7; }
+    input, textarea {
+      width: 100%; font: inherit; font-size: 16px; padding: 12px 16px; color: var(--text);
+      border: 1px solid var(--line); border-radius: 12px; background: var(--bg);
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    #questions .field { margin-top: 24px; }
+    .more { display: block; width: 100%; margin-top: 24px; font: inherit; font-size: 15px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--accent-ink); cursor: pointer; }
+    .more:hover { border-color: var(--accent); }
+    .help { margin: 0 0 8px; padding: 12px 16px; background: var(--bg-soft); border-radius: 12px; font-size: 13px; color: var(--sub); white-space: pre-line; line-height: 1.8; }
+    .choices { display: grid; gap: 8px; }
+    .choice { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 400; margin: 0; }
+    .choice:has(input:checked) { border-color: var(--accent); background: #fbf5f1; }
+    .choice input { width: auto; accent-color: var(--accent); margin: 0; }
+    .req { color: var(--accent-ink); font-weight: 700; }
+    .msg.ok { border-color: #cfe3d4; background: #f3f8f4; color: #1e6b36; }
+    .cancel-box { margin-top: 32px; padding: 24px; background: var(--bg-soft); border-radius: 12px; }
+    .cancel-box .when { font-size: 18px; font-weight: 700; margin: 4px 0 0; }
+    .cancel-box .cap { font-size: 12px; color: var(--sub); margin: 0; }
+    .link { display: inline-block; margin-top: 24px; color: var(--accent-ink); font-weight: 700; }
+    input::placeholder { color: #aaaaaa; }
+
+    .submit {
+      display: block; width: 100%; margin-top: 48px; font: inherit; font-size: 19px; font-weight: 700;
+      letter-spacing: .15em; padding: 16px; border: 0; border-radius: 12px; cursor: pointer;
+      background: var(--accent); color: #fff; transition: opacity .15s;
+    }
+    .submit:hover { opacity: .88; }
+    .submit:disabled { background: var(--line); color: #999999; cursor: not-allowed; opacity: 1; }
+    :focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+    .msg { margin-top: 24px; padding: 16px 20px; border: 1px solid #e8c9c0; background: #fdf6f3; border-radius: 12px; color: #9b2c1f; font-size: 14px; }
+
+    /* ===== 完了画面 ===== */
+    .done .title-box { text-align: center; padding: 48px 24px; }
+    .done .check { width: 48px; height: 48px; margin: 0 auto 16px; border: 1px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 20px; }
+    .done .detail { margin-top: 32px; padding: 24px; background: var(--bg-soft); border-radius: 12px; white-space: pre-line; font-size: 15px; }
+    .done .note { margin-top: 24px; color: var(--sub); font-size: 14px; }
+
+    footer { border-top: 1px solid var(--line); text-align: center; padding: 24px 16px; font-size: 12px; color: var(--sub); letter-spacing: .1em; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="formView">
+      <div class="title-box">
+        <p class="en">RESERVATION</p>
+        <h1 id="pageTitle">ご予約</h1>
+        <p>ご希望の日時をお選びください。</p>
+      </div>
+
+      <form id="bookingForm" novalidate>
+        <section>
+          <div class="step-head"><span class="step-no">STEP 1</span><h2>日時を選ぶ</h2></div>
+          <div id="slotArea"><div class="empty">読み込み中…</div></div>
+        </section>
+
+        <section>
+          <div class="step-head"><span class="step-no">STEP 2</span><h2>お名前とメールアドレス</h2></div>
+          <p class="chosen" id="chosen" hidden></p>
+          <div class="field">
+            <label for="name">お名前</label>
+            <input type="text" id="name" maxlength="50" autocomplete="name" placeholder="山田 花子">
+          </div>
+          <div class="field">
+            <label for="email">メールアドレス <small>（確認メールが届きます）</small></label>
+            <input type="email" id="email" autocomplete="email" placeholder="your@email.com">
+          </div>
+          <div id="questions"></div>
+          <div id="message" class="msg" role="status" hidden></div>
+        </section>
+
+        <button type="submit" class="submit" id="submitBtn" disabled>予約を確定する</button>
+      </form>
+    </div>
+
+    <div id="done" class="done" hidden>
+      <div class="title-box">
+        <div class="check">✓</div>
+        <p class="en">COMPLETED</p>
+        <h1>ご予約が完了しました</h1>
+      </div>
+      <p class="detail" id="doneText"></p>
+      <p class="note">日程の変更・キャンセルは、確認メールからお手続きいただけます。<br>当日お会いできるのを楽しみにしております。</p>
+    </div>
+
+    <div id="cancelView" hidden>
+      <div class="title-box">
+        <p class="en">CANCEL</p>
+        <h1>ご予約のキャンセル</h1>
+        <p id="cancelLead"></p>
+      </div>
+      <div class="cancel-box" id="cancelBox" hidden>
+        <p class="cap">キャンセルするご予約</p>
+        <p class="when" id="cancelWhen"></p>
+      </div>
+      <button type="button" class="submit" id="cancelBtn" hidden>この予約をキャンセルする</button>
+      <div id="cancelMsg" class="msg" role="status" hidden></div>
+      <a class="link" id="rebook" hidden>別の日時で予約する →</a>
+    </div>
+  </main>
+
+  <script>
+    // ===== ここだけ書き換え =====
+    // GitHub Pages に置くときは、GAS のウェブアプリのURL（最後が /exec）を入れる。
+    // GAS の中で使うときは空のままでOK。
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwNyxKWRhBfDO1FfXscLluiLj32nDHoMubX83tEj4Y9sxDNv2HdI3R8owHfQm_6DGyA/exec';
+    // ===========================
+
+    const $ = id => document.getElementById(id);
+    let selected = null;
+    let QUESTIONS = [];
+    let APP_URL = '';
+
+    /** サーバー（GAS）を呼ぶ。GitHub Pages なら fetch、GAS の中なら google.script.run */
+    function call(fn, arg) {
+      if (API_URL) {
+        if (fn === 'getInit') {
+          const q = arg ? '&cancel=' + encodeURIComponent(arg) : '';
+          return fetch(API_URL + '?action=init' + q).then(r => r.json());
+        }
+        const body = fn === 'book' ? { action: 'book', form: arg } : { action: 'cancel', id: arg };
+        // text/plain で送ると、ブラウザの事前確認（CORS）が要らない
+        return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+          .then(r => r.json());
+      }
+      return new Promise((resolve, reject) => {
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](arg);
+      });
+    }
+
+    // キャンセル用のID：GAS の中では埋め込み、GitHub Pages ではURLの ?cancel= から取る
+    const EMBED_CANCEL = '<?= cancelId ?>';
+    const CANCEL_ID = EMBED_CANCEL.indexOf('<?') === 0
+      ? (new URLSearchParams(location.search).get('cancel') || '')
+      : EMBED_CANCEL;
+
+    function showMsg(text) {
+      $('message').textContent = text;
+      $('message').hidden = false;
+    }
+
+    // ===== 質問欄（コード.gs の QUESTIONS から作る） =====
+    function renderQuestions() {
+      const box = $('questions');
+      QUESTIONS.forEach((q, i) => {
+        const f = document.createElement('div');
+        f.className = 'field';
+        const lab = document.createElement(q.type === 'choice' ? 'p' : 'label');
+        lab.style.cssText = 'display:block;font-size:14px;font-weight:500;margin:0 0 8px;';
+        lab.textContent = q.label + ' ';
+        const tag = document.createElement('small');
+        tag.textContent = q.required ? '（必須）' : '（任意）';
+        if (q.required) tag.className = 'req';
+        lab.appendChild(tag);
+        f.appendChild(lab);
+        if (q.help) {
+          const h = document.createElement('p');
+          h.className = 'help';
+          h.textContent = q.help;
+          f.appendChild(h);
+        }
+        if (q.type === 'choice') {
+          const wrap = document.createElement('div');
+          wrap.className = 'choices';
+          (q.options || []).forEach(opt => {
+            const l = document.createElement('label');
+            l.className = 'choice';
+            const r = document.createElement('input');
+            r.type = 'radio';
+            r.name = 'q' + i;
+            r.value = opt;
+            r.addEventListener('change', updateButton);
+            l.append(r, opt);
+            wrap.appendChild(l);
+          });
+          f.appendChild(wrap);
+        } else {
+          const el = document.createElement(q.type === 'textarea' ? 'textarea' : 'input');
+          el.id = 'q' + i;
+          lab.htmlFor = el.id;
+          el.maxLength = 1000;
+          if (q.type === 'textarea') el.rows = 4; else el.type = 'text';
+          if (q.placeholder) el.placeholder = q.placeholder;
+          el.addEventListener('input', updateButton);
+          f.appendChild(el);
+        }
+        box.appendChild(f);
+      });
+    }
+
+    function getAnswers() {
+      return QUESTIONS.map((q, i) => {
+        if (q.type === 'choice') {
+          const c = document.querySelector('input[name="q' + i + '"]:checked');
+          return c ? c.value : '';
+        }
+        return $('q' + i).value;
+      });
+    }
+
+    function updateButton() {
+      const a = getAnswers();
+      const reqOk = QUESTIONS.every((q, i) => !q.required || a[i].trim());
+      $('submitBtn').disabled = !(selected && $('name').value.trim() && $('email').value.trim() && reqOk);
+    }
+
+    function renderSlots(slots) {
+      const area = $('slotArea');
+      area.innerHTML = '';
+      selected = null;
+      $('chosen').hidden = true;
+      if (!slots.length) {
+        area.innerHTML = '<div class="empty">現在、予約できる枠はありません</div>';
+        updateButton();
+        return;
+      }
+      // 日付ごとにまとめる（label 例：「11月1日(日) 10:00〜11:00」）
+      const groups = {};
+      slots.forEach(s => {
+        const [day, time] = s.label.split(' ');
+        (groups[day] = groups[day] || []).push({ ...s, time });
+      });
+      const PAGE = 7; // 最初に見せる日数
+      let more = null;
+      Object.keys(groups).forEach((day, di) => {
+        const h = document.createElement('p');
+        h.className = 'day';
+        h.textContent = day;
+        const box = document.createElement('div');
+        box.className = 'slots';
+        if (di >= PAGE) { h.hidden = true; box.hidden = true; h.dataset.later = box.dataset.later = '1'; }
+        groups[day].forEach(s => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'slot';
+          b.textContent = s.time.split('〜')[0];
+          b.setAttribute('aria-pressed', 'false');
+          b.setAttribute('aria-label', s.label);
+          b.onclick = () => {
+            area.querySelectorAll('.slot').forEach(x => x.setAttribute('aria-pressed', 'false'));
+            b.setAttribute('aria-pressed', 'true');
+            selected = s;
+            $('chosen').innerHTML = '';
+            const cap = document.createElement('span');
+            cap.textContent = '選択中の日時';
+            $('chosen').append(cap, s.label);
+            $('chosen').hidden = false;
+            updateButton();
+            // 選んだら、名前の入力欄まで自動で移動する
+            setTimeout(() => {
+              const top = $('chosen').getBoundingClientRect().top + window.pageYOffset - 16;
+              window.scrollTo({ top: top, behavior: 'smooth' });
+              // なめらかな移動が効かない環境でも、確実に移動させる
+              setTimeout(() => { if (Math.abs(window.pageYOffset - top) > 40) window.scrollTo(0, top); }, 700);
+            }, 150);
+          };
+          box.appendChild(b);
+        });
+        area.append(h, box);
+      });
+      if (Object.keys(groups).length > PAGE) {
+        more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'more';
+        more.textContent = '次の7日を見る';
+        more.onclick = () => {
+          const hidden = [...area.querySelectorAll('[data-later][hidden]')];
+          hidden.slice(0, PAGE * 2).forEach(el => { el.hidden = false; });
+          if (hidden.length <= PAGE * 2) more.remove();
+        };
+        area.appendChild(more);
+      }
+      updateButton();
+    }
+
+    function loadSlots() {
+      call('getInit', '')
+        .then(res => renderSlots(res.slots || []))
+        .catch(() => showMsg('枠の読み込みに失敗しました。ページを開き直してください。'));
+    }
+
+    $('name').addEventListener('input', updateButton);
+    $('email').addEventListener('input', updateButton);
+
+    $('bookingForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const btn = $('submitBtn');
+      btn.disabled = true;
+      btn.textContent = '送信中…';
+      $('message').hidden = true;
+      call('book', {
+        name: $('name').value,
+        email: $('email').value,
+        datetime: selected.value,
+        answers: getAnswers(),
+      })
+        .then(res => {
+          btn.textContent = '予約を確定する';
+          if (res.ok) {
+            $('formView').hidden = true;
+            $('doneText').textContent = res.message;
+            $('done').hidden = false;
+            window.scrollTo(0, 0);
+          } else {
+            showMsg(res.message);
+            loadSlots(); // 埋まった枠を消すために読み直す
+          }
+        })
+        .catch(() => {
+          btn.textContent = '予約を確定する';
+          showMsg('通信エラーが起きました。少し時間をおいてもう一度お試しください。');
+          updateButton();
+        });
+    });
+
+    // ===== キャンセル画面（メールのリンクから来たとき） =====
+    function showRebook() {
+      $('rebook').href = API_URL ? location.pathname : APP_URL;
+      $('rebook').hidden = false;
+    }
+
+    function showCancel(CANCEL) {
+      $('formView').hidden = true;
+      $('cancelView').hidden = false;
+      const lead = {
+        ok: '内容をご確認のうえ、下のボタンを押してください。',
+        already: 'このご予約は、すでにキャンセルされています。',
+        past: '開始時刻を過ぎたご予約は、キャンセルできません。',
+        notfound: 'ご予約が見つかりませんでした。リンクをご確認ください。',
+      };
+      $('cancelLead').textContent = lead[CANCEL.state] || lead.notfound;
+      if (CANCEL.label) {
+        $('cancelWhen').textContent = CANCEL.label;
+        $('cancelBox').hidden = false;
+      }
+      if (CANCEL.state === 'ok') {
+        $('cancelBtn').hidden = false;
+        $('cancelBtn').onclick = () => {
+          $('cancelBtn').disabled = true;
+          $('cancelBtn').textContent = '処理中…';
+          call('cancelBooking', CANCEL_ID)
+            .then(res => {
+              const m = $('cancelMsg');
+              m.textContent = res.message;
+              m.className = 'msg' + (res.ok ? ' ok' : '');
+              m.hidden = false;
+              $('cancelBtn').hidden = true;
+              showRebook();
+            })
+            .catch(() => {
+              $('cancelBtn').disabled = false;
+              $('cancelBtn').textContent = 'この予約をキャンセルする';
+              $('cancelMsg').textContent = '通信エラーが起きました。少し時間をおいてもう一度お試しください。';
+              $('cancelMsg').hidden = false;
+            });
+        };
+      } else {
+        showRebook();
+      }
+    }
+
+    // ===== 開いたとき：名前・質問・枠（またはキャンセルの状態）をまとめて受け取る =====
+    call('getInit', CANCEL_ID)
+      .then(res => {
+        document.title = res.sessionName + 'のご予約';
+        $('pageTitle').textContent = res.sessionName + 'のご予約';
+        QUESTIONS = res.questions || [];
+        APP_URL = res.appUrl || '';
+        renderQuestions();
+        if (CANCEL_ID) showCancel(res.cancel || { state: 'notfound', label: '' });
+        else renderSlots(res.slots || []);
+      })
+      .catch(() => {
+        $('slotArea').innerHTML = '<div class="empty">読み込みに失敗しました。ページを開き直してください。</div>';
+      });
+  </script>
+</body>
+</html>
